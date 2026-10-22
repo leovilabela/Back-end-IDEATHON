@@ -1,0 +1,282 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealNews</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #212121;
+            color: #f5f5f5;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 22px 35px;
+            background: #171717;
+            border-bottom: 1px solid #333;
+        }
+
+        .logo {
+            font-size: 23px;
+            font-weight: bold;
+        }
+
+        .logo span {
+            color: #10a37f;
+        }
+
+        main {
+            max-width: 850px;
+            margin: 70px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 45px;
+            line-height: 1.6;
+        }
+
+        .files {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+        }
+
+        .file-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            min-height: 190px;
+            padding: 25px 15px;
+            border: 1px solid #414141;
+            border-radius: 16px;
+            background: #2b2b2b;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .file-card:hover {
+            background: #353535;
+            border-color: #10a37f;
+            transform: translateY(-3px);
+        }
+
+        .icon {
+            font-size: 43px;
+        }
+
+        .file-card h2 {
+            font-size: 17px;
+        }
+
+        .file-card p {
+            color: #aaa;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .selected-files {
+            margin-top: 30px;
+            padding: 18px;
+            border: 1px solid #414141;
+            border-radius: 12px;
+            color: #bbb;
+            font-size: 14px;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+        }
+
+        .selected-files h3 {
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .selected-files ul {
+            padding-left: 20px;
+        }
+
+        footer {
+            text-align: center;
+            color: #777;
+            padding: 30px 15px;
+            font-size: 12px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 20px;
+            }
+
+            main {
+                margin: 35px auto;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+
+            .files {
+                grid-template-columns: 1fr;
+            }
+
+            .file-card {
+                min-height: 145px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">Real<span>News</span></div>
+    </header>
+
+    <main>
+        <h1>Adicionar arquivos</h1>
+
+        <p class="subtitle">
+            Descubra se o conteúdo é veridico ou falso, selecionando arquivos.
+          
+        </p>
+
+        <div class="files">
+
+            <a href="#"
+               class="file-card"
+               onclick="abrirSeletor(event, 'pdf')">
+                <span class="icon">📕</span>
+                <h2>Arquivos PDF</h2>
+                <p>Selecionar documentos PDF</p>
+            </a>
+
+            <a href="#"
+               class="file-card"
+               onclick="abrirSeletor(event, 'documentos')">
+                <span class="icon">📄</span>
+                <h2>Documentos</h2>
+                <p>DOC, DOCX, TXT e outros</p>
+            </a>
+
+            <a href="#"
+               class="file-card"
+               onclick="abrirSeletor(event, 'imagens')">
+                <span class="icon">🖼️</span>
+                <h2>Imagens</h2>
+                <p>JPG, PNG e WEBP</p>
+            </a>
+
+        </div>
+
+        <input type="file" id="pdf"
+               accept=".pdf" multiple>
+
+        <input type="file" id="documentos"
+               accept=".doc,.docx,.txt,.rtf,.odt,.xls,.xlsx,.csv,.ppt,.pptx"
+               multiple>
+
+        <input type="file" id="imagens"
+               accept="image/*" multiple>
+
+        <div class="selected-files">
+            <h3>📎 Arquivos selecionados</h3>
+            <ul id="lista">
+                <li>Nenhum arquivo selecionado.</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        Selecione seus PDFs, documentos ou imagens.
+    </footer>
+
+    <script>
+        const lista = document.getElementById("lista");
+        const arquivosSelecionados = new Map();
+
+        function abrirSeletor(event, tipo) {
+            event.preventDefault();
+            document.getElementById(tipo).click();
+        }
+
+        ["pdf", "documentos", "imagens"].forEach(tipo => {
+            document.getElementById(tipo).addEventListener(
+                "change",
+                function () {
+                    for (const arquivo of this.files) {
+                        const chave = tipo + ":" +
+                            arquivo.name + ":" +
+                            arquivo.size;
+
+                        arquivosSelecionados.set(chave, arquivo);
+                    }
+
+                    atualizarLista();
+                    this.value = "";
+                }
+            );
+        });
+
+        function atualizarLista() {
+            lista.replaceChildren();
+
+            if (arquivosSelecionados.size === 0) {
+                const item = document.createElement("li");
+                item.textContent = "Nenhum arquivo selecionado.";
+                lista.appendChild(item);
+                return;
+            }
+
+            arquivosSelecionados.forEach((arquivo, chave) => {
+                const item = document.createElement("li");
+                item.textContent =
+                    arquivo.name + " (" +
+                    (arquivo.size / 1024).toFixed(1) + " KB) ";
+
+                const remover = document.createElement("button");
+                remover.textContent = "Remover";
+                remover.type = "button";
+                remover.style.cssText =
+                    "margin-left:10px;cursor:pointer;" +
+                    "background:none;border:0;color:#10a37f;";
+
+                remover.addEventListener("click", () => {
+                    arquivosSelecionados.delete(chave);
+                    atualizarLista();
+                });
+
+                item.appendChild(remover);
+                lista.appendChild(item);
+            });
+        }
+    </script>
+
+</body>
+</html>
